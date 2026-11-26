@@ -27,7 +27,7 @@ import { createRhythm, NO_RHYTHM } from './rhythm/index.js';
 import { Sfx } from './audio/sfx.js';
 import { setupToolbar } from './ui/toolbar.js';
 import { applyTheme } from './ui/theme.js';
-import { setupSiteLinks, setupAnalytics } from './ui/site.js';
+import { setupSiteLinks, setupPortals, setupAnalytics } from './ui/site.js';
 
 const cfg = pickCharacter();
 const { model: modelCfg, personality, presentation } = cfg;
@@ -35,6 +35,7 @@ const BAKE = new URLSearchParams(location.search).has('bake');
 const app = document.querySelector('#app');
 
 setupSiteLinks();
+setupPortals(app);
 setupAnalytics();
 applyCharacterText(presentation);
 applyTheme(presentation.theme);

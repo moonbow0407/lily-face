@@ -1,0 +1,157 @@
+/* 左上角纯图标按钮（音效 / B站 / 源码） */
+.toolbar.left {
+  gap: 8px;
+}
+.toolbar.left button,
+.toolbar.left a.tool-link {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: center;
+}
+.toolbar.left a.tool-link svg {
+  opacity: 0.94;
+}
+@media (max-width: 520px) {
+  .toolbar.left button,
+  .toolbar.left a.tool-link {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+}
+
+/* 左下角角色传送门（由 site.json 的 portals 生成，src/ui/site.js） */
+.portal-dock {
+  position: absolute;
+  left: 14px;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  max-width: calc(100vw - 28px);
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(var(--shade), 0.1);
+  transition: opacity .5s ease .45s, transform .25s ease;
+}
+
+#app[data-state="loading"] .portal-dock,
+body.rhythm-playing .portal-dock {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.portal-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background .16s ease, color .16s ease, transform .14s ease;
+}
+
+a.portal-item:hover {
+  background: rgba(var(--shade), 0.09);
+  color: var(--chip-active);
+  transform: translateY(-1px);
+}
+
+a.portal-item:active {
+  transform: scale(0.97);
+}
+
+.portal-item[aria-current="page"] {
+  background: var(--chip-active);
+  color: var(--chip-active-ink);
+  box-shadow: 0 2px 8px rgba(var(--shade), 0.22);
+  cursor: default;
+}
+
+.portal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--portal-color, var(--accent));
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 1px 4px rgba(var(--shade), 0.22);
+}
+
+.portal-item[aria-current="page"] .portal-dot {
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9), 0 0 6px var(--portal-color, #fff);
+}
+
+.portal-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.portal-icon svg {
+  width: 17px;
+  height: 15px;
+  display: block;
+}
+
+.portal-tag {
+  padding: 2px 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  background: rgba(var(--shade), 0.1);
+  color: var(--ink);
+  opacity: 0.82;
+}
+
+.portal-arrow {
+  width: 11px;
+  height: 11px;
+  opacity: 0.48;
+  flex-shrink: 0;
+  transition: transform .15s ease, opacity .15s ease;
+}
+
+a.portal-item:hover .portal-arrow {
+  opacity: 0.88;
+  transform: translate(1px, -1px);
+}
+
+@media (max-width: 520px) {
+  .portal-dock {
+    left: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    padding: 3px;
+    gap: 2px;
+  }
+  .portal-item {
+    padding: 5px 9px;
+    gap: 5px;
+    font-size: 11px;
+  }
+  .portal-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .portal-icon svg {
+    width: 15px;
+    height: 13px;
+  }
+  .portal-tag {
+    font-size: 9px;
+    padding: 1.5px 4px;
+  }
+}

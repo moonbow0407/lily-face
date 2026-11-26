@@ -1,22 +1,44 @@
 {
-  "$comment": "站点配置。links 是左上角的链接按钮，icon 可选 github / origin / link；cloudflare.analyticsToken 留空就不加统计。",
+  "$comment": "站点配置。links 是左上角的链接按钮，icon 可选 github / bilibili / origin / link；portals 是左下角角色传送门；cloudflare.analyticsToken 留空就不加统计。",
   "defaultCharacter": "lily",
   "links": [
+    {
+      "label": "B站",
+      "title": "访问作者 B 站主页（月虹月虹月）",
+      "href": "https://space.bilibili.com/501821982",
+      "icon": "bilibili"
+    },
     {
       "label": "源码",
       "title": "在 GitHub 上查看源码",
       "href": "https://github.com/moonbow0407/lily-face",
       "icon": "github"
+    }
+  ],
+  "portals": [
+    {
+      "label": "莉莉",
+      "title": "当前站点：捏捏莉莉",
+      "color": "#a799d8",
+      "current": true
     },
     {
-      "label": "原站",
-      "title": "访问菲比捏脸模拟器原站（玩法与形变公式的出处）",
+      "label": "达妮娅",
+      "title": "去捏达妮娅",
+      "href": "https://daniya-face.pages.dev/",
+      "color": "#e488ad"
+    },
+    {
+      "label": "菲比",
+      "tag": "致谢",
+      "title": "致谢：灵感来源与参考（菲比捏脸模拟器）",
       "href": "https://phoebe-face-lab.vercel.app/",
-      "icon": "origin"
+      "icon": "origin",
+      "color": "#e5be67"
     }
   ],
   "cloudflare": {
     "pagesProject": "lily-face",
-    "analyticsToken": ""
+    "analyticsToken": "e69ae051660d492c8f1cdf4fdbd93640"
   }
 }

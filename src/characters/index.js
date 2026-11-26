@@ -1,11 +1,10 @@
 /*
- * 角色注册表。新增角色：npm run port -- new <id> ...（会自动加到下面）。
- * 通过 ?char=<id> 选择角色，默认是 site.json 的 defaultCharacter。
+ * 角色注册表。通过 ?char=<id> 选择角色，默认是 site.json 的 defaultCharacter。
  */
 import site from '../../site.json';
-import daniya from './daniya/index.js';
+import lily from './lily/index.js';
 
-export const CHARACTERS = { daniya };
+export const CHARACTERS = { lily };
 export const DEFAULT_CHARACTER = site.defaultCharacter;
 
 /** 引擎默认值：角色配置里没写的项用这些（反应都是"没有"的保守值，文案是通用的） */

@@ -1,20 +1,29 @@
 import * as THREE from 'three';
 import { symbolUniforms, symbolCenter } from '../rig/symbols.js';
+import { createVertexSymbols } from '../rig/vertexSymbols.js';
 import { BlinkRhythm } from '../rig/springs.js';
 import { MorphDriver } from './morphs.js';
 import { createSignals } from './signals.js';
 
 const { damp } = THREE.MathUtils;
 
-/** 给彩蛋补上符号贴片的起点（预设位置的中心），返回运行时用的副本 */
-export function prepareSymbols(mesh, symbolMaterial, eggs) {
-  const withFrom = (e) => e && { ...e, from: symbolCenter(mesh, symbolMaterial, e.spot) };
+/**
+ * 整理彩蛋，返回运行时用的副本。彩蛋 = 拉脸时偶尔换成的另一套表情（morphs），可以再带一个 UV 漫画符号（symbol）。
+ * 带符号的彩蛋补上贴片起点（预设位置的中心）；模型没有符号贴片时，带符号的彩蛋丢掉，只有表情的照常用。
+ */
+export function prepareSymbols(mesh, symbolMaterial, eggs = {}) {
   const ok = !!symbolMaterial && mesh.material.some((m) => m.name === symbolMaterial);
+  const prep = (e) => {
+    if (!e) return null;
+    if (!e.symbol) return { ...e };
+    return ok ? { ...e, from: symbolCenter(mesh, symbolMaterial, e.spot) } : null;
+  };
+  const list = (eggs.list ?? []).map(prep).filter(Boolean);
   return {
-    chance: ok ? eggs.chance : 0,
-    tint: eggs.tint,
-    list: ok ? eggs.list.map(withFrom) : [],
-    dizzy: ok ? withFrom(eggs.dizzy) : null,
+    chance: list.length ? eggs.chance ?? 0 : 0,
+    tint: eggs.tint ?? [0.24, 0.5, 0.84],
+    list,
+    dizzy: prep(eggs.dizzy),
   };
 }
 
@@ -25,9 +34,10 @@ export function prepareSymbols(mesh, symbolMaterial, eggs) {
 export function createFace(ctx) {
   const { cfg, mesh, model, pose, s, pokes, sfx, symbols, debug } = ctx;
   const { morphs: morphNames, symbolSpots = [], materials } = cfg.model;
-  const morphs = new MorphDriver(mesh, morphNames);
+  const morphs = new MorphDriver(mesh, morphNames, cfg.model.instantMorphs);
   const blink = new BlinkRhythm();
   blink.onTick = (second) => sfx.blinkTick(second);
+  const updateVertexSymbols = createVertexSymbols(mesh, cfg.model);
   const signals = createSignals({ s, sfx, symbols, debug, mesh, symbolCenter, symbolMaterial: materials.symbol });
 
   let pullLean = 0, motionTime = 0;
@@ -60,11 +70,11 @@ export function createFace(ctx) {
 
   /** 漫画符号：位置直接到位，靠透明度淡入淡出，出现时从稍高处轻轻滑下来 */
   function showSymbol(egg, ef) {
-    if (model.symbolMat) model.symbolMat.opacity = ef;
+    if (model.symbolMat) model.symbolMat.opacity = egg?.symbol ? ef : 0;
     for (const n of model.uvMorphs.names) model.uvMorphs.set(n, egg?.symbol === n ? 1 : 0);
     model.uvMorphs.update();
-    for (const spot of symbolSpots) morphs.setRaw(spot, egg?.spot === spot ? 1 : 0);
-    if (!egg) return;
+    for (const spot of symbolSpots) morphs.setRaw(spot, egg?.symbol && egg.spot === spot ? 1 : 0);
+    if (!egg?.symbol) return; // 只有表情的彩蛋
     symbolUniforms.uSymFrom.value.copy(egg.from);
     symbolUniforms.uSymTo.value.set(egg.at[0], egg.at[1] + 0.07 * (1 - ef), egg.at[2]);
     symbolUniforms.uSymScale.value = egg.scale;
@@ -90,9 +100,10 @@ export function createFace(ctx) {
     for (const b of pose.eyeBones) b.quaternion.multiply(_q);
 
     const targets = { blink: p.blink };
-    // 表情表每帧读取：工作台（?studio）切换方案时会整个替换
     cfg.personality.expressions(p, (k, v) => { targets[k] = (targets[k] ?? 0) + v; });
     if (debug.morphs) Object.assign(targets, debug.morphs);
     morphs.apply(targets, dt);
+    if (debug.raw) morphs.setRaw(debug.raw, 1); // 工作台预览：按模型里的名字直接显示某个表情
+    updateVertexSymbols(morphs, debug);
   };
 }

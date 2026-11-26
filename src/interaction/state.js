@@ -32,6 +32,7 @@ export function createInteractionState({ actions, defaultAction, behavior }) {
     holdStart: null, // 拉开超过阈值的时刻（脸红计时）
     pullAmount: 0, // 平滑后的拉扯程度 0..1
     egg: null, // 本次拉扯触发的彩蛋（见角色配置 symbols）
+    roll: 0, // 每次动作开始（戳一下 / 按下拉或捧）掷一次的随机数 0..1，表情表据此选招牌表情或变体
 
     // 拖动
     pressPx: new THREE.Vector2(),
@@ -45,6 +46,8 @@ export function createInteractionState({ actions, defaultAction, behavior }) {
 
     // --- 戳 ---
     pokeUntil: -Infinity, // 戳完 550ms 内是"被戳"表情
+    pokeCombo: 0, // 连戳次数（两次间隔 < 0.7 秒算连戳）
+    lastPokeAt: -Infinity,
 
     // --- 捧脸 ---
     cupHeld: false,

@@ -1,5 +1,5 @@
 {
-  "name": "mmd-face-lab",
+  "name": "lily-face",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,15 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "inspect-model": "node scripts/inspect-pmx.mjs",
-    "port": "node scripts/port/cli.mjs"
+    "inspect-model": "node scripts/inspect-pmx.mjs"
   },
   "dependencies": {
     "three": "0.170.0"
   },
   "devDependencies": {
-    "jpeg-js": "^0.4.4",
-    "pngjs": "^7.0.0",
     "vite": "^6.4.6"
   }
 }

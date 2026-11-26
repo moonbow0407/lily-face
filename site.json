@@ -1,11 +1,11 @@
 {
-  "$comment": "站点配置：用模板做自己的站时改这里（见 skills/port-character/SKILL.md 第 0 步）。links 是左上角的链接按钮，icon 可选 github / origin / link；cloudflare.analyticsToken 留空就不加统计。",
-  "defaultCharacter": "daniya",
+  "$comment": "站点配置。links 是左上角的链接按钮，icon 可选 github / origin / link；cloudflare.analyticsToken 留空就不加统计。",
+  "defaultCharacter": "lily",
   "links": [
     {
       "label": "源码",
       "title": "在 GitHub 上查看源码",
-      "href": "https://github.com/moonbow0407/daniya-face",
+      "href": "https://github.com/moonbow0407/lily-face",
       "icon": "github"
     },
     {
@@ -16,7 +16,7 @@
     }
   ],
   "cloudflare": {
-    "pagesProject": "daniya-face",
-    "analyticsToken": "695c9f98a0ac453a8bee27ccbe0c46f9"
+    "pagesProject": "lily-face",
+    "analyticsToken": ""
   }
 }

@@ -5,7 +5,11 @@
 import theme from './theme.js';
 
 export default {
-  name: '__NAME__',
+  name: '莉莉',
+  images: {
+    finale: '/finale-lily.jpg', // 音游结算图：官方立绘 public/lily.png 的上半身方形裁切
+    finaleAlt: '莉莉',
+  },
   theme: theme.css,
   outline: theme.outline,
 };

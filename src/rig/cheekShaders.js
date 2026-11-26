@@ -14,7 +14,7 @@ const HEAD = /* glsl */ `
 uniform vec4 uPokes[${POKE_SLOTS}];
 uniform vec3 uGrab, uDelta;
 uniform float uPullSides, uCheekSpring, uRadius, uHairSlack, uHairKnee, uHairFollow;
-uniform vec2 uCheekJiggle;
+uniform vec2 uCheekJiggle, uPokeFade;
 attribute float aCheekMobility;
 attribute float aCheekWeight;
 `;
@@ -39,9 +39,9 @@ const POKE = /* glsl */ `
  float lipBand=1.0-smoothstep(.08,.19,abs(rp.y-16.985));
  float cheekSide=smoothstep(mix(.12,.27,lipBand),mix(.36,.50,lipBand),abs(rp.x));
  float poke=indentation/(1.0+2.8*abs(indentation))*aCheekMobility
-  *cheekSide*smoothstep(16.66,16.88,rp.y)*(1.0-smoothstep(17.30,17.46,rp.y));
+  *cheekSide*smoothstep(16.66,16.88,rp.y)*(1.0-smoothstep(uPokeFade.x,uPokeFade.y,rp.y));
  poke-=.40*max(poke,0.0);
- float padMask=aCheekMobility*cheekSide*smoothstep(16.59,16.84,rp.y)*(1.0-smoothstep(17.24,17.45,rp.y));
+ float padMask=aCheekMobility*cheekSide*smoothstep(16.59,16.84,rp.y)*(1.0-smoothstep(uPokeFade.x-.06,uPokeFade.y-.01,rp.y));
  float fullness=cheekBulge/(1.0+2.0*abs(cheekBulge));
  rd+=vec3(sign(rp.x)*.76,.17,.58)*fullness*padMask;
  rd.xy+=spread*.60*padMask;

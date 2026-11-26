@@ -41,7 +41,7 @@ export async function setupPose({ mesh, bones: cfg, hairRest, bake, onBakeProgre
       out[b.name] = [...b.quaternion.toArray(), ...b.position.toArray()].map((v) => +v.toFixed(6));
     });
     window.__bakedHairRest = JSON.stringify(out);
-    console.info(`[bake] ${Object.keys(out).length} 根骨骼，复制 window.__bakedHairRest 存为角色目录下的 hairRest.json`);
+    console.info(`[bake] ${Object.keys(out).length} 根骨骼（开发服务器会自动写入角色目录的 hairRest.json）`);
     helper.enable('physics', false);
   } else {
     helper.add(mesh, { physics: false });

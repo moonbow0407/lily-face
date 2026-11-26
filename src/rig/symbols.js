@@ -38,23 +38,30 @@ export function setupSymbol(material) {
       shader.vertexShader.replace('#include <morphtarget_vertex>', `#include <morphtarget_vertex>
 vSymLocal = transformed - uSymFrom;
 transformed = uSymTo + vSymLocal * uSymScale;`);
-    // 重新上色：原图是饱和亮蓝 + 粗黑线，和模型的柔和色调不搭。
-    // 线稿改成柔和的深蓝灰，填充改成上浅下深的淡蓝，保留原图高光；不吃光照，半透明像水。
-    shader.fragmentShader = 'uniform vec3 uSymTint;\nvarying vec3 vSymLocal;\n' + shader.fragmentShader
-      .replace('#include <map_fragment>', `#include <map_fragment>
-float symLum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
-float symLine = 1.0 - smoothstep(0.03, 0.2, symLum);
-float symTop = clamp(vSymLocal.y / 1.1 + 0.5, 0.0, 1.0);
-vec3 symFill = mix(uSymTint, mix(uSymTint, vec3(1.0), 0.62), smoothstep(0.2, 0.85, symTop));
-vec3 symColor = mix(symFill, vec3(0.08, 0.13, 0.26), symLine);
-symColor = mix(symColor, vec3(1.0), smoothstep(0.7, 0.95, symLum) * (1.0 - symLine));
-float symAlpha = diffuseColor.a * mix(0.82, 0.95, symLine);`)
-      .replace('#include <opaque_fragment>', `outgoingLight = symColor;
-diffuseColor.a = symAlpha;
-#include <opaque_fragment>`);
+    shader.fragmentShader = 'uniform vec3 uSymTint;\nvarying vec3 vSymLocal;\n' + recolorSymbol(shader.fragmentShader, 'uSymTint', 'vSymLocal.y / 1.1');
   };
   material.customProgramCacheKey = () => 'symbol';
   material.needsUpdate = true;
+}
+
+/**
+ * 漫画符号统一画风（贴片符号和顶点表情符号共用）：原图常是饱和色 + 粗黑线，和模型的柔和色调不搭。
+ * 线稿改成柔和的深蓝灰，填充改成上浅下深的 tint 色，保留原图高光；不吃光照，半透明。
+ * tint：填充色 uniform 名；height：符号内的相对高度表达式（-0.5 底 .. 0.5 顶）。
+ */
+export function recolorSymbol(fragmentShader, tint, height) {
+  return fragmentShader
+    .replace('#include <map_fragment>', `#include <map_fragment>
+float symLum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+float symLine = 1.0 - smoothstep(0.03, 0.2, symLum);
+float symTop = clamp(${height} + 0.5, 0.0, 1.0);
+vec3 symFill = mix(${tint}, mix(${tint}, vec3(1.0), 0.62), smoothstep(0.2, 0.85, symTop));
+vec3 symColor = mix(symFill, vec3(0.08, 0.13, 0.26), symLine);
+symColor = mix(symColor, vec3(1.0), smoothstep(0.7, 0.95, symLum) * (1.0 - symLine));
+float symAlpha = diffuseColor.a * mix(0.82, 0.95, symLine);`)
+    .replace('#include <opaque_fragment>', `outgoingLight = symColor;
+diffuseColor.a = symAlpha;
+#include <opaque_fragment>`);
 }
 
 /** 某个位置表情生效后，贴片的中心（绑定姿态坐标） */

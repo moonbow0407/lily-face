@@ -24,11 +24,14 @@ export const uniforms = {
   uHairSlack: { value: 0.11 },
   uHairKnee: { value: 0.03 },
   uHairFollow: { value: 0.8 },
+  // 戳凹在眼睛下方淡出的高度（参考坐标 [开始, 完全消失]），由角色配置的 pokeFade 写入
+  uPokeFade: { value: new THREE.Vector2(17.30, 17.46) },
 };
 
 /** 按角色配置初始化形变：坐标校准 + 前发避让参数。必须在给材质打补丁之前调用 */
-export function configureRig({ calibration, hairAvoid }) {
+export function configureRig({ calibration, hairAvoid, pokeFade }) {
   configureCalibration(calibration);
+  if (pokeFade) uniforms.uPokeFade.value.set(...pokeFade);
   uniforms.uRadius.value = calib.faceWidth * 0.2;
   if (hairAvoid) {
     uniforms.uHairSlack.value = hairAvoid.slack;

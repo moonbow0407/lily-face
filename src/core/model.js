@@ -27,7 +27,8 @@ export function prepareModel({ mesh, uvMorphData, scene, materials }) {
   addCheekMobility(geo);
   for (const m of mesh.material) {
     if (has(materials.skin, m.name)) patchMaterial(m, 'face');
-    else if (has(materials.mouth, m.name)) patchMaterial(m, 'mouth');
+    // 口腔，以及眼睛、睫毛这类独立材质：只跟随戳，免得脸颊被戳凹时它们从皮肤后面露出来
+    else if (has(materials.mouth, m.name) || has(materials.followPoke, m.name)) patchMaterial(m, 'mouth');
     else if (has(materials.hairOnCheek, m.name)) patchMaterial(m, 'hair');
     // 描边走的是独立着色器，不会跟着脸颊变形 → 脸部和贴纸不画描边
     if (has(materials.noOutline, m.name) && m.userData.outlineParameters) m.userData.outlineParameters.visible = false;

@@ -57,14 +57,22 @@ export function loadAmmo() {
 
 /**
  * 加载 PMX 模型和贴图。
- * keepMorphs：只保留实际用到的顶点表情。模型往往带一两百个 morph，过滤后
+ * keepMorphs：只保留实际用到的顶点表情（null = 全留，工作台用）。模型往往带一两百个 morph，过滤后
  * 移动端 WebGL 显存与内存占用可降低约 85%（达妮娅 ~330MB → ~49MB）。
+ * texDir：贴图目录在磁盘上的真实名字（大小写敏感，探测脚本写进 model.js）。
  * 返回 mesh 和 UV 表情数据（漫画符号用，MMDLoader 本身不支持）。
  */
-export async function loadModel({ url, sizeHint, keepMorphs, progress }) {
+export async function loadModel({ url, sizeHint, keepMorphs, progress, texDir = 'tex' }) {
   const manager = new THREE.LoadingManager();
-  // 模型里贴图路径大小写、斜杠混用（TEX/Tex/tex、反斜杠），统一成 tex/
-  manager.setURLModifier((u) => u.replace(/\\/g, '/').replace(/\/(TEX|Tex)\//, '/tex/'));
+  // 模型里贴图路径大小写、斜杠混用（TEX/Tex/tex、反斜杠）；服务器区分大小写，统一成磁盘上的真实目录名
+  const lower = `/${texDir.toLowerCase()}/`;
+  manager.setURLModifier((u) => {
+    u = u.replace(/\\/g, '/');
+    const i = u.toLowerCase().lastIndexOf(lower);
+    return i < 0 ? u : `${u.slice(0, i)}/${texDir}/${u.slice(i + lower.length)}`;
+  });
+  // 贴图 404 时开发服务器会返回 index.html（模型只剩描边、控制台却没有报错），这里明确报出来
+  manager.onError = (u) => console.error(`[贴图] 加载失败：${u}（核对 public/ 下的文件名和大小写）`);
   manager.onProgress = (u, loaded, total) => { if (!u.endsWith('.pmx')) progress.tex = loaded / total; };
   const texturesReady = new Promise((resolve) => { manager.onLoad = resolve; });
 
@@ -73,7 +81,7 @@ export async function loadModel({ url, sizeHint, keepMorphs, progress }) {
     loader.loadPMX(url, (data) => {
       try {
         const uvMorphData = data.morphs.filter((m) => m.type === 3);
-        data.morphs = data.morphs.filter((m) => m.type === 1 && keepMorphs.has(m.name));
+        data.morphs = data.morphs.filter((m) => m.type === 1 && (!keepMorphs || keepMorphs.has(m.name)));
         data.metadata.morphCount = data.morphs.length;
         const mesh = loader.meshBuilder.setCrossOrigin(loader.crossOrigin).build(data, THREE.LoaderUtils.extractUrlBase(url));
         resolve({ mesh, uvMorphData });

@@ -12,7 +12,9 @@ export function usedMorphNames(model) {
  * 语义名在模型层配置 morphs 里映射；模型没有的表情自动忽略。
  */
 export class MorphDriver {
-  constructor(mesh, names) {
+  /** instant：不做平滑的语义名（半开半合时难看的表情，过渡由表情表自己控制，见 model.instantMorphs） */
+  constructor(mesh, names, instant = []) {
+    this.instant = new Set(['blink', ...instant]);
     this.dict = mesh.morphTargetDictionary;
     this.infl = mesh.morphTargetInfluences;
     this.names = names; // 语义名 → morph 名
@@ -33,8 +35,8 @@ export class MorphDriver {
       const name = this.names[k];
       if (!name || !(name in this.dict)) continue;
       const t = clamp(targets[k] ?? 0, 0, 1.25);
-      // 眨眼直接用曲线；其它表情 ~60ms 跟随，避免跳变
-      const next = k === 'blink' ? t : damp(v, t, t > v ? 22 : 14, dt);
+      // 眨眼等直接用目标值；其它表情 ~60ms 跟随，避免跳变
+      const next = this.instant.has(k) ? t : damp(v, t, t > v ? 22 : 14, dt);
       this.shown.set(k, next);
       this.infl[this.dict[name]] = next;
     }

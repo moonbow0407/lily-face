@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { MMDLoader } from 'three/examples/jsm/loaders/MMDLoader.js';
+import { fetchPmx, fetchWebpList } from './modelFetch.js';
 
 /**
  * 加载界面 + 模型加载。
@@ -66,28 +67,29 @@ export async function loadModel({ url, sizeHint, keepMorphs, progress, texDir = 
   const manager = new THREE.LoadingManager();
   // 模型里贴图路径大小写、斜杠混用（TEX/Tex/tex、反斜杠）；服务器区分大小写，统一成磁盘上的真实目录名
   const lower = `/${texDir.toLowerCase()}/`;
+  // 线上构建给大部分 PNG 贴图配了等价的无损 WebP，清单里有的就换成 WebP（scripts/optimize-models.mjs）
+  const [buffer, webp] = await Promise.all([
+    fetchPmx(url, sizeHint, (p) => { progress.pmx = p; }),
+    fetchWebpList(),
+  ]);
+  progress.pmx = 1;
   manager.setURLModifier((u) => {
     u = u.replace(/\\/g, '/');
     const i = u.toLowerCase().lastIndexOf(lower);
-    return i < 0 ? u : `${u.slice(0, i)}/${texDir}/${u.slice(i + lower.length)}`;
+    if (i >= 0) u = `${u.slice(0, i)}/${texDir}/${u.slice(i + lower.length)}`;
+    return webp.has(u) ? u.replace(/\.png$/i, '.webp') : u;
   });
   // 贴图 404 时开发服务器会返回 index.html（模型只剩描边、控制台却没有报错），这里明确报出来
   manager.onError = (u) => console.error(`[贴图] 加载失败：${u}（核对 public/ 下的文件名和大小写）`);
   manager.onProgress = (u, loaded, total) => { if (!u.endsWith('.pmx')) progress.tex = loaded / total; };
   const texturesReady = new Promise((resolve) => { manager.onLoad = resolve; });
 
-  const result = await new Promise((resolve, reject) => {
-    const loader = new MMDLoader(manager);
-    loader.loadPMX(url, (data) => {
-      try {
-        const uvMorphData = data.morphs.filter((m) => m.type === 3);
-        data.morphs = data.morphs.filter((m) => m.type === 1 && (!keepMorphs || keepMorphs.has(m.name)));
-        data.metadata.morphCount = data.morphs.length;
-        const mesh = loader.meshBuilder.setCrossOrigin(loader.crossOrigin).build(data, THREE.LoaderUtils.extractUrlBase(url));
-        resolve({ mesh, uvMorphData });
-      } catch (err) { reject(err); }
-    }, (e) => { progress.pmx = Math.min(1, e.loaded / (e.total || sizeHint)); }, reject);
-  });
-  progress.pmx = 1;
-  return { ...result, texturesReady };
+  const loader = new MMDLoader(manager);
+  // MMDLoader 没有"从字节解析"的公开接口；three 版本锁死在 package.json，这里用它内部的解析器
+  const data = loader._getParser().parsePmx(buffer, true);
+  const uvMorphData = data.morphs.filter((m) => m.type === 3);
+  data.morphs = data.morphs.filter((m) => m.type === 1 && (!keepMorphs || keepMorphs.has(m.name)));
+  data.metadata.morphCount = data.morphs.length;
+  const mesh = loader.meshBuilder.setCrossOrigin(loader.crossOrigin).build(data, THREE.LoaderUtils.extractUrlBase(url));
+  return { mesh, uvMorphData, texturesReady };
 }

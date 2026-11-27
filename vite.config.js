@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { writeFileSync, existsSync } from 'node:fs';
+import { optimizeModels } from './scripts/optimize-models.mjs';
 import { join } from 'node:path';
 
 /**
@@ -38,5 +39,5 @@ function hairRestWriter() {
 export default defineConfig({
   build: { target: 'es2022' },
   server: { port: 5173, strictPort: true },
-  plugins: [hairRestWriter()],
+  plugins: [hairRestWriter(), optimizeModels()],
 });

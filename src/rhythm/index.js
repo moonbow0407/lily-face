@@ -49,6 +49,7 @@ export function createRhythm({ root, button, song, hint, storagePrefix, images, 
     try { localStorage.setItem(syncKey, String(sync)); } catch { /* ignore */ }
     view.renderSync(sync);
     sfx.tick();
+    btn.blur();
   });
 
   const T = (ts) => player.time(ts) - sync / 1000;
@@ -142,6 +143,7 @@ export function createRhythm({ root, button, song, hint, storagePrefix, images, 
   }
 
   button.addEventListener('click', () => {
+    button.blur(); // 避免按钮留着焦点，音游中按/长按空格时误触发按钮点击而退出
     if (active) { stop(); return; }
     sfx.ensureContext();
     active = true;
@@ -150,9 +152,11 @@ export function createRhythm({ root, button, song, hint, storagePrefix, images, 
     onToggle(true);
     startSong();
   });
-  view.retryBtn.addEventListener('click', startSong);
+  view.retryBtn.addEventListener('click', () => { view.retryBtn.blur(); startSong(); });
   view.finale.addEventListener('click', (e) => {
-    const act = e.target.closest('button')?.dataset.act;
+    const btn = e.target.closest('button');
+    const act = btn?.dataset.act;
+    btn?.blur();
     if (act === 'again') startSong();
     else if (act === 'exit') stop();
   });

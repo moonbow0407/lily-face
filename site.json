@@ -17,16 +17,22 @@
   ],
   "portals": [
     {
-      "label": "莉莉",
-      "title": "当前站点：捏捏莉莉",
-      "color": "#a799d8",
-      "current": true
-    },
-    {
       "label": "达妮娅",
       "title": "去捏达妮娅",
       "href": "https://daniya-face.pages.dev/",
       "color": "#e488ad"
+    },
+    {
+      "label": "西格莉卡",
+      "title": "去捏西格莉卡",
+      "href": "https://sigrika-face.pages.dev/",
+      "color": "#f29452"
+    },
+    {
+      "label": "莉莉",
+      "title": "当前站点：捏捏莉莉",
+      "color": "#a799d8",
+      "current": true
     },
     {
       "label": "菲比",

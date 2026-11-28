@@ -235,9 +235,10 @@ export function createInput(ctx) {
   // 音游键盘支持：空格 / D / F / J / K 均可点按与长按
   window.addEventListener('keydown', (e) => {
     const rh = rhythm();
-    if (!rh.active || !rh.playing || e.repeat || !RHYTHM_KEYS.has(e.code)) return;
-    if (s.holdId !== null) return;
+    if (!rh.active || !RHYTHM_KEYS.has(e.code)) return;
+    // 只要在音游模式里就先拦下默认行为（含长按 repeat 与加载中），防止空格触发带焦点的按钮点击或滚屏
     e.preventDefault();
+    if (!rh.playing || e.repeat || s.holdId !== null) return;
     sfx.ensureContext();
     const hit = model.rhythmHit();
     const pressed = rh.press(e);
@@ -256,6 +257,8 @@ export function createInput(ctx) {
     rhythmHoldTarget();
   });
   window.addEventListener('keyup', (e) => {
+    const rh = rhythm();
+    if (rh.active && RHYTHM_KEYS.has(e.code)) e.preventDefault();
     if (s.keyHoldCode && e.code === s.keyHoldCode) {
       s.keyHoldCode = null;
       if (s.holdId === 'key') endHold(true, e.timeStamp);
